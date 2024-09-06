@@ -1,7 +1,7 @@
 // Examples:
 // - decodeBencode("5:hello") -> "hello"
 // - decodeBencode("10:hello12345") -> "hello12345"
-function decodeBencode(bencodedValue: string): string | number {
+function decodeBencode(bencodedValue: string): string | number | any[] {
     /* This function is used to decode a bencoded string
     The bencoded string is a string that is prefixed by the length of the string
     **/
@@ -15,6 +15,22 @@ function decodeBencode(bencodedValue: string): string | number {
         return bencodedValue.substring(firstColonIndex + 1);
     }if( bencodedValue[0]==='i' && bencodedValue[bencodedValue.length-1]=='e' ){
         return parseInt(bencodedValue.substring(1, bencodedValue.length-1));
+    } if( bencodedValue[0]=='l' && bencodedValue[bencodedValue.length-1]=='e' ){
+        const result : any[] = [];
+        const resultStrings: string[] = [];
+        let isString: boolean = false, isNumber : boolean = false;
+        for(let i=1; i<bencodedValue.length-1; i++){
+            if(!isNaN(parseInt(bencodedValue[i]))){
+                let str: string = bencodedValue.substring(i, i+parseInt(bencodedValue[i])+2);
+                i = i+parseInt(bencodedValue[i])+2;
+                result.push(decodeBencode(str));
+            }else if(bencodedValue[i]==='i'){
+                let str: string = "";
+                while(bencodedValue[++i]!='e') str += bencodedValue[i];
+                result.push(decodeBencode(str));
+            }
+        }
+        return result;
     } else {
         throw new Error("Only strings are supported at the moment");
     }
