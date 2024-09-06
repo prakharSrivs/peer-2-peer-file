@@ -17,18 +17,19 @@ function decodeBencode(bencodedValue: string): string | number | any[] {
         return parseInt(bencodedValue.substring(1, bencodedValue.length-1));
     } if( bencodedValue[0]=='l' && bencodedValue[bencodedValue.length-1]=='e' ){
         const result : any[] = [];
-        const resultStrings: string[] = [];
-        let isString: boolean = false, isNumber : boolean = false;
         for(let i=1; i<bencodedValue.length-1; i++){
+            let str: string = "";
             if(!isNaN(parseInt(bencodedValue[i]))){
-                let str: string = bencodedValue.substring(i, i+parseInt(bencodedValue[i])+2);
+                str = bencodedValue.substring(i, i+parseInt(bencodedValue[i])+2);
                 i = i+parseInt(bencodedValue[i])+2;
                 result.push(decodeBencode(str));
             }else if(bencodedValue[i]==='i'){
-                let str: string = "";
-                while(bencodedValue[++i]!='e') str += bencodedValue[i];
+                str = "i";
+                while(bencodedValue[i]!=='e') str += bencodedValue[i++];
+                console.log(str);
                 result.push(decodeBencode(str));
             }
+            console.log(str);
         }
         return result;
     } else {
