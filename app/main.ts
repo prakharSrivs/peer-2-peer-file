@@ -1,54 +1,20 @@
-// Examples:
-// - decodeBencode("5:hello") -> "hello"
-// - decodeBencode("10:hello12345") -> "hello12345"
-function decodeBencode(bencodedValue: string): string | number | any[] {
-    /* This function is used to decode a bencoded string
-    The bencoded string is a string that is prefixed by the length of the string
-    **/
-
-    // Check if the first character is a digit
-    if (!isNaN(parseInt(bencodedValue[0]))) {
-        const firstColonIndex = bencodedValue.indexOf(":");
-        if (firstColonIndex === -1) {
-            throw new Error("Invalid encoded value");
-        }
-        return bencodedValue.substring(firstColonIndex + 1);
-    }if( bencodedValue[0]==='i' && bencodedValue[bencodedValue.length-1]=='e' ){
-        return parseInt(bencodedValue.substring(1, bencodedValue.length-1));
-    } if( bencodedValue[0]=='l' && bencodedValue[bencodedValue.length-1]=='e' ){
-        const result : any[] = [];
-        for(let i=1; i<bencodedValue.length-1; i++){
-            let str: string = "";
-            if(!isNaN(parseInt(bencodedValue[i]))){
-                str = bencodedValue.substring(i, i+parseInt(bencodedValue[i])+2);
-                i = i+parseInt(bencodedValue[i])+2;
-                result.push(decodeBencode(str));
-            }else if(bencodedValue[i]==='i'){
-                str = "i";
-                while(bencodedValue[i]!=='e') str += bencodedValue[i++];
-                console.log(str);
-                result.push(decodeBencode(str));
-            }
-            console.log(str);
-        }
-        return result;
-    } else {
-        throw new Error("Only strings are supported at the moment");
-    }
-}
+import { decodeBencode } from "./decode";
+import { parseTorrentInfo } from "./info";
 
 const args = process.argv;
 const bencodedValue = args[3];
 
 if (args[2] === "decode") {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    // console.log("Logs from your program will appear here!");
-    // console.log(args);
-    // Uncomment this block to pass the first stage
     try {
         const decoded = decodeBencode(bencodedValue);
         console.log(JSON.stringify(decoded));
     } catch (error: any) {
         console.error(error.message);
+    }
+}else if(args[2] == "info"){
+    try{
+        const info = await parseTorrentInfo(bencodedValue);
+    }catch(error: any){
+        console.error(error);
     }
 }
